@@ -1,13 +1,13 @@
 import MeetupDetail from "../../components/meetups/meetupDetail";
-import { MongoClient } from "mongodb";
+import { MongoClient ,ObjectId} from "mongodb";
 
-function MeetupDetailsPage() {
+function MeetupDetailsPage(props:any) {
   return (
     <MeetupDetail
-      image="https://upload.wikimedia.org/wikipedia/commons/6/63/Night_view_of_Meskel_Square.jpg"
-      title="first Meetup"
-      address="somewhere in AA"
-      description="some desctiopitn"
+      image={props.image}
+      title={props.title}
+      address={props.address}
+      description={props.description}
     />
   );
 }
@@ -42,19 +42,27 @@ export async function getStaticPaths() {
 export async function getStaticProps(context: any) {
   //fetch data for a single meetup
 
+  
   const meetupID = context.params.meetUpId;
+  
+  const client = await MongoClient.connect(
+    "mongodb+srv://nextjs-2022:nextjs2022@cluster0.bmmne.mongodb.net/?retryWrites=true&w=majority"
+  );
+  const db = client.db();
+
+  const meetupsCollection = db.collection("meetups");
+
+  const selectedMeetup=await meetupsCollection.findOne({_id: ObjectId(meetupID)})
+  console.log("🚀 TEST", selectedMeetup);
+
+  client.close();
+
+
   console.log("🚀 ~ file: index.tsx:19 ~ getStaticProps ~ meetupId", meetupID);
 
   return {
     props: {
-      meetupData: {
-        image:
-          "https://upload.wikimedia.org/wikipedia/commons/6/63/Night_view_of_Meskel_Square.jpg",
-        id: meetupID,
-        title: "Night View of",
-        address: "Meskel Square",
-        description: "Night",
-      },
+      meetupData: selectedMeetup
     },
   };
 }
